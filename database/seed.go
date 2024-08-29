@@ -10,13 +10,15 @@ import (
 )
 
 func Seed(db *gorm.DB) {
-	err := db.AutoMigrate(&models.Book{})
+	err := db.AutoMigrate(&models.Book{}, &models.Author{}, &models.AuthorBook{})
 
 	if err != nil {
 		log.Println("failed to seed the database: ", err)
 	}
 
 	SeedBooks(db)
+	SeedAuthors(db)
+	SeedAuthorBooks(db)
 }
 
 func SeedBooks(db *gorm.DB) {
@@ -30,5 +32,29 @@ func SeedBooks(db *gorm.DB) {
 	for _, book := range *books {
 		controllers.AddBook(db, &book)
 	}
-	//TODO now that we have read the file, unmarshal the json and get the books from it to populate the table
+}
+
+func SeedAuthors(db *gorm.DB) {
+	data, err := os.ReadFile("database/initial_authors.json")
+
+	if err != nil {
+		log.Println("error reading initial authors", err)
+	}
+	authors := &[]models.Author{}
+	json.Unmarshal(data, authors)
+	for _, author := range *authors {
+		controllers.AddAuthor(db, &author)
+	}
+}
+func SeedAuthorBooks(db *gorm.DB) {
+	data, err := os.ReadFile("database/initial_author_books.json")
+
+	if err != nil {
+		log.Println("error reading initial author_books", err)
+	}
+	authorBooks := &[]models.AuthorBook{}
+	json.Unmarshal(data, authorBooks)
+	for _, authorBook := range *authorBooks {
+		controllers.AddAuthorBook(db, &authorBook)
+	}
 }

@@ -1,12 +1,9 @@
 package models
 
-import "gorm.io/gorm"
-
 type Book struct {
-	gorm.Model
+	BookID    uint64 `gorm:"primaryKey;autoIncrement"`
 	Title     string
-	Author    string
-	Pages     int
-	WordCount int
+	Pages     uint64
+	WordCount uint64
 	Status    string
 }
