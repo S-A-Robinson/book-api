@@ -8,13 +8,14 @@ import (
 
 var database *gorm.DB
 
-func New() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open("books.db"), &gorm.Config{})
+func New(dbLocation string) *gorm.DB {
+	db, err := gorm.Open(sqlite.Open(dbLocation), &gorm.Config{})
 
 	if err != nil {
 		log.Println("failed to connect database: ", err)
 	}
 
+	Migrate(db)
 	Seed(db)
 
 	return db

@@ -28,12 +28,12 @@ func AddBook(db *gorm.DB, book *models.Book) {
 func UpdateReadingStatus(db *gorm.DB, id, newStatus string) {
 	db.
 		Model(&models.Book{}).
-		Where("id = ?", id).
+		Where("book_id = ?", id).
 		Update("Status", newStatus)
 }
 
 func DeleteBook(db *gorm.DB, id string) {
-	db.Where("id = ?", id).Delete(&models.Book{})
+	db.Where("book_id = ?", id).Delete(&models.Book{})
 }
 
 type stats struct {

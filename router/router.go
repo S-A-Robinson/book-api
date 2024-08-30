@@ -3,6 +3,7 @@ package router
 import (
 	"books-api/controllers"
 	"books-api/models"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 	"net/http"
@@ -19,6 +20,8 @@ var BookStatuses = map[string]bool{
 	BookStatusRead:       true,
 	BookStatusPlanToRead: true,
 }
+
+const ErrBadBookStatus = "bad request: a book status must be either: 'Reading', 'Read' or 'Plan To Read'"
 
 func New(db *gorm.DB) *echo.Echo {
 	e := echo.New()
@@ -46,14 +49,17 @@ func New(db *gorm.DB) *echo.Echo {
 	// Add new book
 	e.POST("/books", func(c echo.Context) error {
 		b := new(models.Book)
-		err := c.Bind(&b)
 
-		if err != nil {
-			return c.String(http.StatusBadRequest, "bad request")
+		if err := c.Bind(&b); err != nil {
+			return c.String(http.StatusBadRequest, fmt.Sprintf("bad request: %s", err))
+		}
+
+		if !BookStatuses[b.Status] {
+			return c.String(http.StatusBadRequest, ErrBadBookStatus)
 		}
 
 		controllers.AddBook(db, b)
-		return c.NoContent(http.StatusOK)
+		return c.NoContent(http.StatusCreated)
 	})
 
 	// Add a new author
@@ -66,7 +72,7 @@ func New(db *gorm.DB) *echo.Echo {
 		}
 
 		controllers.AddAuthor(db, a)
-		return c.NoContent(http.StatusOK)
+		return c.NoContent(http.StatusCreated)
 	})
 
 	// Add a new author book
@@ -79,7 +85,7 @@ func New(db *gorm.DB) *echo.Echo {
 		}
 
 		controllers.AddAuthorBook(db, ab)
-		return c.NoContent(http.StatusOK)
+		return c.NoContent(http.StatusCreated)
 	})
 
 	// PUT

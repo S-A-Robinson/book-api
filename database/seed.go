@@ -9,13 +9,15 @@ import (
 	"os"
 )
 
-func Seed(db *gorm.DB) {
+func Migrate(db *gorm.DB) {
 	err := db.AutoMigrate(&models.Book{}, &models.Author{}, &models.AuthorBook{})
 
 	if err != nil {
-		log.Println("failed to seed the database: ", err)
+		log.Println("failed to migrate the database: ", err)
 	}
+}
 
+func Seed(db *gorm.DB) {
 	SeedBooks(db)
 	SeedAuthors(db)
 	SeedAuthorBooks(db)
