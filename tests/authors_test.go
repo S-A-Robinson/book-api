@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 )
 
@@ -17,16 +16,19 @@ var marshalledAuthors, _ = json.Marshal(&database.InitialAuthors)
 func TestGetAuthors(t *testing.T) {
 	s := server.New()
 
-	buffer := bytes.Buffer{}
+	request := helpers.Request{
+		Method: http.MethodGet,
+		Url:    "/authors",
+	}
 
+	buffer := bytes.Buffer{}
 	json.NewEncoder(&buffer).Encode("{}")
 
 	cases := []helpers.TestCase{
 
 		{
 			TestName:           "it successfully gets all authors in db",
-			Request:            httptest.NewRequest(http.MethodGet, "/authors", nil),
-			RequestReader:      httptest.NewRecorder(),
+			Request:            request,
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedBody:       string(marshalledAuthors) + "\n",
 		},
@@ -43,25 +45,26 @@ func TestGetAuthors(t *testing.T) {
 func TestPostAuthors(t *testing.T) {
 	s := server.New()
 
-	buffer := bytes.Buffer{}
-
-	json.NewEncoder(&buffer).Encode("{}")
+	request := helpers.Request{
+		Method: http.MethodPost,
+		Url:    "/authors",
+	}
 
 	cases := []helpers.TestCase{
 		{
 			TestName: "it adds a new author",
-			Request: httptest.NewRequest(http.MethodPost, "/authors", helpers.Encode(&models.Author{
+			Request:  request,
+			RequestBody: &models.Author{
 				AuthorID:  4,
 				FirstName: "Test",
 				LastName:  "Author",
-			})),
-			RequestReader:      httptest.NewRecorder(),
+			},
 			ExpectedStatusCode: http.StatusCreated,
 		},
 		{
 			TestName:           "it returns a bad request if an invalid author is sent",
-			Request:            httptest.NewRequest(http.MethodPost, "/authors", &buffer),
-			RequestReader:      httptest.NewRecorder(),
+			Request:            request,
+			RequestBody:        "{}",
 			ExpectedStatusCode: http.StatusBadRequest,
 			ExpectedBody:       "bad request",
 		},

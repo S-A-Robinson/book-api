@@ -6,11 +6,9 @@ import (
 	"books-api/server"
 	"books-api/server/handlers"
 	"books-api/tests/helpers"
-	"bytes"
 	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 )
 
@@ -47,12 +45,17 @@ var invalidNewBook = `{"title": 12, "status": "Reading" }`
 
 func TestGetBooks(t *testing.T) {
 	s := server.New()
+
+	request := helpers.Request{
+		Method: http.MethodGet,
+		Url:    "/books",
+	}
+
 	cases := []helpers.TestCase{
 		{
 			TestName:           "it successfully gets all books in db",
-			Request:            httptest.NewRequest(http.MethodGet, "/books", nil),
+			Request:            request,
 			RequestContentType: echo.MIMEApplicationJSON,
-			RequestReader:      httptest.NewRecorder(),
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedBody:       string(marshalledBooks) + "\n",
 		},
@@ -67,49 +70,56 @@ func TestGetBooks(t *testing.T) {
 
 func TestPostBooks(t *testing.T) {
 	s := server.New()
+
+	request := helpers.Request{
+		Method: http.MethodPost,
+		Url:    "/books",
+	}
+
 	cases := []helpers.TestCase{
 		{
 			TestName: "it adds a new book",
-			Request: httptest.NewRequest(http.MethodPost, "/books", helpers.Encode(&models.BookWithAuthor{
+			Request:  request,
+			RequestBody: &models.BookWithAuthor{
 				Title:     "Test New Book",
 				Pages:     100,
 				WordCount: 2123,
 				Status:    "Reading",
 				AuthorID:  2,
-			})),
-			RequestReader:      httptest.NewRecorder(),
+			},
+
 			ExpectedStatusCode: http.StatusCreated,
 		},
 		{
 			TestName: "it returns a bad request if the status is incorrect",
-			Request: httptest.NewRequest(http.MethodPost, "/books", helpers.Encode(&models.Book{
+			Request:  request,
+			RequestBody: &models.Book{
 				BookID:    2,
 				Title:     "Invalid Status Book",
 				Pages:     101,
 				WordCount: 1234,
 				Status:    "Invalid Status",
-			})),
-			RequestReader:      httptest.NewRecorder(),
+			},
 			ExpectedStatusCode: http.StatusBadRequest,
 			ExpectedBody:       handlers.ErrBadBookStatus,
 		},
 		{
 			TestName:           "it returns a bad request if the body isn't valid",
-			Request:            httptest.NewRequest(http.MethodPost, "/books", bytes.NewBuffer([]byte(invalidNewBook))),
-			RequestReader:      httptest.NewRecorder(),
+			Request:            request,
+			RequestBody:        invalidNewBook,
 			ExpectedStatusCode: http.StatusBadRequest,
 			ExpectedBody:       handlers.ErrBadBook,
 		},
 		{
 			TestName: "it returns an error if the author doesn't exist",
-			Request: httptest.NewRequest(http.MethodPost, "/books", helpers.Encode(&models.BookWithAuthor{
+			Request:  request,
+			RequestBody: &models.BookWithAuthor{
 				Title:     "Test New Book With Invalid Author",
 				Pages:     100,
 				WordCount: 2123,
 				Status:    "Reading",
 				AuthorID:  4000,
-			})),
-			RequestReader:      httptest.NewRecorder(),
+			},
 			ExpectedStatusCode: http.StatusBadRequest,
 			ExpectedBody:       "couldn't find author with id 4000",
 		},
@@ -124,21 +134,27 @@ func TestPostBooks(t *testing.T) {
 
 func TestPutBooks(t *testing.T) {
 	s := server.New()
+
+	request := helpers.Request{
+		Method: http.MethodPut,
+		Url:    "/books/1",
+	}
+
 	cases := []helpers.TestCase{
 		{
 			TestName: "it updates book with new status",
-			Request: httptest.NewRequest(http.MethodPut, "/books/1", helpers.Encode(&models.Book{
+			Request:  request,
+			RequestBody: &models.Book{
 				Status: "Read",
-			})),
-			RequestReader:      httptest.NewRecorder(),
+			},
 			ExpectedStatusCode: http.StatusAccepted,
 		},
 		{
 			TestName: "it returns a bad request if the status is invalid",
-			Request: httptest.NewRequest(http.MethodPut, "/books/1", helpers.Encode(&models.Book{
+			Request:  request,
+			RequestBody: &models.Book{
 				Status: "Invalid Status",
-			})),
-			RequestReader:      httptest.NewRecorder(),
+			},
 			ExpectedStatusCode: http.StatusBadRequest,
 			ExpectedBody:       handlers.ErrBadBookStatus,
 		},
@@ -152,11 +168,16 @@ func TestPutBooks(t *testing.T) {
 }
 func TestDeleteBooks(t *testing.T) {
 	s := server.New()
+
+	request := helpers.Request{
+		Method: http.MethodDelete,
+		Url:    "/books/1",
+	}
+
 	cases := []helpers.TestCase{
 		{
 			TestName:           "it successfully deletes a book",
-			Request:            httptest.NewRequest(http.MethodDelete, "/books/1", nil),
-			RequestReader:      httptest.NewRecorder(),
+			Request:            request,
 			ExpectedStatusCode: http.StatusOK,
 		},
 	}

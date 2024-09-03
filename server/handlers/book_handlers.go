@@ -37,6 +37,7 @@ func (h *BookHandler) GetBooks(c echo.Context) error {
 
 func (h *BookHandler) AddBook(c echo.Context) error {
 	b := new(models.BookWithAuthor)
+
 	if err := c.Bind(&b); err != nil {
 		return c.String(http.StatusBadRequest, ErrBadBook)
 	}

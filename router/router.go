@@ -20,18 +20,5 @@ func New(r *repos.Repos) *echo.Echo {
 	e.GET("/authors", authorHandler.GetAuthors)
 	e.POST("/authors", authorHandler.AddAuthor)
 
-	//// Add a new author book
-	//e.POST("/author-books", func(c echo.Context) error {
-	//	ab := new(models.AuthorBook)
-	//	err := c.Bind(&ab)
-	//
-	//	if err != nil {
-	//		return c.String(http.StatusBadRequest, "bad request")
-	//	}
-	//
-	//	repos.AddAuthorBook(db, ab)
-	//	return c.NoContent(http.StatusCreated)
-	//})
-
 	return e
 }

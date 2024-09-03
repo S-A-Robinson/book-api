@@ -4,17 +4,21 @@ import (
 	"books-api/server"
 	"books-api/tests/helpers"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 )
 
 func TestStats(t *testing.T) {
 	s := server.New()
+
+	request := helpers.Request{
+		Method: http.MethodGet,
+		Url:    "/stats",
+	}
+
 	cases := []helpers.TestCase{
 		{
 			TestName:           "it returns stats",
-			Request:            httptest.NewRequest(http.MethodGet, "/stats", nil),
-			RequestReader:      httptest.NewRecorder(),
+			Request:            request,
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedBody:       "{\"Pages\":2181,\"WordCount\":540500}\n",
 		},
