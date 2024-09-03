@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"books-api/database"
 	"books-api/models"
 	"books-api/server"
 	"books-api/tests/helpers"
@@ -11,7 +12,9 @@ import (
 	"testing"
 )
 
-func TestAuthors(t *testing.T) {
+var marshalledAuthors, _ = json.Marshal(&database.InitialAuthors)
+
+func TestGetAuthors(t *testing.T) {
 	s := server.New()
 
 	buffer := bytes.Buffer{}
@@ -25,12 +28,30 @@ func TestAuthors(t *testing.T) {
 			Request:            httptest.NewRequest(http.MethodGet, "/authors", nil),
 			RequestReader:      httptest.NewRecorder(),
 			ExpectedStatusCode: http.StatusOK,
-			ExpectedBody:       "[]\n",
+			ExpectedBody:       string(marshalledAuthors) + "\n",
 		},
+	}
+
+	for _, testCase := range cases {
+		t.Run(testCase.TestName, func(t *testing.T) {
+			helpers.ExecuteTest(t, s.Echo, testCase)
+		})
+	}
+
+}
+
+func TestPostAuthors(t *testing.T) {
+	s := server.New()
+
+	buffer := bytes.Buffer{}
+
+	json.NewEncoder(&buffer).Encode("{}")
+
+	cases := []helpers.TestCase{
 		{
 			TestName: "it adds a new author",
 			Request: httptest.NewRequest(http.MethodPost, "/authors", helpers.Encode(&models.Author{
-				AuthorID:  1,
+				AuthorID:  4,
 				FirstName: "Test",
 				LastName:  "Author",
 			})),

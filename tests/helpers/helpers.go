@@ -29,7 +29,6 @@ func ExecuteTest(t *testing.T, e *echo.Echo, testCase TestCase) {
 func Encode(data interface{}) *bytes.Buffer {
 	var buffer bytes.Buffer
 	json.NewEncoder(&buffer).Encode(data)
-
 	return &buffer
 }
 

@@ -16,7 +16,7 @@ func TestStats(t *testing.T) {
 			Request:            httptest.NewRequest(http.MethodGet, "/stats", nil),
 			RequestReader:      httptest.NewRecorder(),
 			ExpectedStatusCode: http.StatusOK,
-			ExpectedBody:       "{\"Pages\":0,\"WordCount\":0}\n",
+			ExpectedBody:       "{\"Pages\":2181,\"WordCount\":540500}\n",
 		},
 	}
 

@@ -1,12 +1,10 @@
 package database
 
 import (
-	"books-api/controllers"
 	"books-api/models"
-	"encoding/json"
+	"books-api/repos"
 	"gorm.io/gorm"
 	"log"
-	"os"
 )
 
 func Migrate(db *gorm.DB) {
@@ -18,45 +16,22 @@ func Migrate(db *gorm.DB) {
 }
 
 func Seed(db *gorm.DB) {
-	SeedBooks(db)
 	SeedAuthors(db)
-	SeedAuthorBooks(db)
-}
-
-func SeedBooks(db *gorm.DB) {
-	data, err := os.ReadFile("database/initial_books.json")
-
-	if err != nil {
-		log.Println("error reading initial books", err)
-	}
-	books := &[]models.Book{}
-	json.Unmarshal(data, books)
-	for _, book := range *books {
-		controllers.AddBook(db, &book)
-	}
+	SeedBooks(db)
 }
 
 func SeedAuthors(db *gorm.DB) {
-	data, err := os.ReadFile("database/initial_authors.json")
-
-	if err != nil {
-		log.Println("error reading initial authors", err)
-	}
-	authors := &[]models.Author{}
-	json.Unmarshal(data, authors)
+	authors := &InitialAuthors
+	authorRepo := repos.NewAuthorRepository(db)
 	for _, author := range *authors {
-		controllers.AddAuthor(db, &author)
+		authorRepo.AddAuthor(&author)
 	}
 }
-func SeedAuthorBooks(db *gorm.DB) {
-	data, err := os.ReadFile("database/initial_author_books.json")
 
-	if err != nil {
-		log.Println("error reading initial author_books", err)
-	}
-	authorBooks := &[]models.AuthorBook{}
-	json.Unmarshal(data, authorBooks)
-	for _, authorBook := range *authorBooks {
-		controllers.AddAuthorBook(db, &authorBook)
+func SeedBooks(db *gorm.DB) {
+	books := &InitialBooks
+	bookRepo := repos.NewBookRepository(db)
+	for _, book := range *books {
+		bookRepo.AddBook(&book)
 	}
 }
