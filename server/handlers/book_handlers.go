@@ -3,7 +3,6 @@ package handlers
 import (
 	"books-api/models"
 	"books-api/repos"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -21,6 +20,7 @@ var BookStatuses = map[string]bool{
 }
 
 const ErrBadBookStatus = "bad request: a book status must be either: 'Reading', 'Read' or 'Plan To Read'"
+const ErrBadBook = "bad request: can't create book with invalid details"
 
 type BookHandler struct {
 	Repo *repos.BookRepository
@@ -38,7 +38,7 @@ func (h *BookHandler) GetBooks(c echo.Context) error {
 func (h *BookHandler) AddBook(c echo.Context) error {
 	b := new(models.BookWithAuthor)
 	if err := c.Bind(&b); err != nil {
-		return c.String(http.StatusBadRequest, fmt.Sprintf("bad request: %s", err))
+		return c.String(http.StatusBadRequest, ErrBadBook)
 	}
 
 	if !BookStatuses[b.Status] {
@@ -60,7 +60,7 @@ func (h *BookHandler) UpdateBook(c echo.Context) error {
 	c.Bind(&b)
 
 	if !BookStatuses[b.Status] {
-		return c.String(http.StatusBadRequest, "bad status")
+		return c.String(http.StatusBadRequest, ErrBadBookStatus)
 	}
 	h.Repo.UpdateReadingStatus(id, b.Status)
 	return c.NoContent(http.StatusAccepted)

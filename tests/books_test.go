@@ -6,6 +6,7 @@ import (
 	"books-api/server"
 	"books-api/server/handlers"
 	"books-api/tests/helpers"
+	"bytes"
 	"encoding/json"
 	"github.com/labstack/echo/v4"
 	"net/http"
@@ -42,6 +43,8 @@ var expectedBooks = []models.BookWithAuthorDetails{
 
 var marshalledBooks, _ = json.Marshal(&expectedBooks)
 
+var invalidNewBook = `{"title": 12, "status": "Reading" }`
+
 func TestGetBooks(t *testing.T) {
 	s := server.New()
 	cases := []helpers.TestCase{
@@ -52,19 +55,6 @@ func TestGetBooks(t *testing.T) {
 			RequestReader:      httptest.NewRecorder(),
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedBody:       string(marshalledBooks) + "\n",
-		},
-		{
-			TestName: "it returns a bad request if the status is incorrect",
-			Request: httptest.NewRequest(http.MethodPost, "/books", helpers.Encode(&models.Book{
-				BookID:    2,
-				Title:     "Invalid Status Book",
-				Pages:     101,
-				WordCount: 1234,
-				Status:    "Invalid Status",
-			})),
-			RequestReader:      httptest.NewRecorder(),
-			ExpectedStatusCode: http.StatusBadRequest,
-			ExpectedBody:       handlers.ErrBadBookStatus,
 		},
 	}
 
@@ -90,6 +80,39 @@ func TestPostBooks(t *testing.T) {
 			RequestReader:      httptest.NewRecorder(),
 			ExpectedStatusCode: http.StatusCreated,
 		},
+		{
+			TestName: "it returns a bad request if the status is incorrect",
+			Request: httptest.NewRequest(http.MethodPost, "/books", helpers.Encode(&models.Book{
+				BookID:    2,
+				Title:     "Invalid Status Book",
+				Pages:     101,
+				WordCount: 1234,
+				Status:    "Invalid Status",
+			})),
+			RequestReader:      httptest.NewRecorder(),
+			ExpectedStatusCode: http.StatusBadRequest,
+			ExpectedBody:       handlers.ErrBadBookStatus,
+		},
+		{
+			TestName:           "it returns a bad request if the body isn't valid",
+			Request:            httptest.NewRequest(http.MethodPost, "/books", bytes.NewBuffer([]byte(invalidNewBook))),
+			RequestReader:      httptest.NewRecorder(),
+			ExpectedStatusCode: http.StatusBadRequest,
+			ExpectedBody:       handlers.ErrBadBook,
+		},
+		{
+			TestName: "it returns an error if the author doesn't exist",
+			Request: httptest.NewRequest(http.MethodPost, "/books", helpers.Encode(&models.BookWithAuthor{
+				Title:     "Test New Book With Invalid Author",
+				Pages:     100,
+				WordCount: 2123,
+				Status:    "Reading",
+				AuthorID:  4000,
+			})),
+			RequestReader:      httptest.NewRecorder(),
+			ExpectedStatusCode: http.StatusBadRequest,
+			ExpectedBody:       "couldn't find author with id 4000",
+		},
 	}
 
 	for _, testCase := range cases {
@@ -109,6 +132,15 @@ func TestPutBooks(t *testing.T) {
 			})),
 			RequestReader:      httptest.NewRecorder(),
 			ExpectedStatusCode: http.StatusAccepted,
+		},
+		{
+			TestName: "it returns a bad request if the status is invalid",
+			Request: httptest.NewRequest(http.MethodPut, "/books/1", helpers.Encode(&models.Book{
+				Status: "Invalid Status",
+			})),
+			RequestReader:      httptest.NewRecorder(),
+			ExpectedStatusCode: http.StatusBadRequest,
+			ExpectedBody:       handlers.ErrBadBookStatus,
 		},
 	}
 
