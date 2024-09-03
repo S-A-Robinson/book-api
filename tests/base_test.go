@@ -13,7 +13,6 @@ func TestMain(m *testing.M) {
 		fmt.Printf("Error setting up testing environment: %v", err)
 	}
 
-	// Run the test
 	code := m.Run()
 
 	os.Exit(code)

@@ -10,7 +10,7 @@ func main() {
 	err := os.Setenv("ENVIRONMENT", "development")
 
 	if err != nil {
-		fmt.Printf("Error setting up testing environment: %v", err)
+		fmt.Printf("Error setting up dev environment: %v", err)
 	}
 
 	s := server.New()
