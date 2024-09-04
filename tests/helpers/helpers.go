@@ -3,7 +3,6 @@ package helpers
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	"io"
 	"net/http"
@@ -52,8 +51,6 @@ func GenerateRequest(testCase *TestCase) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(string(reqJson))
 
 	var req *http.Request
 	if testCase.RequestReader != nil {

@@ -63,13 +63,23 @@ func (h *BookHandler) UpdateBook(c echo.Context) error {
 	if !BookStatuses[b.Status] {
 		return c.String(http.StatusBadRequest, ErrBadBookStatus)
 	}
-	h.Repo.UpdateReadingStatus(id, b.Status)
+	err := h.Repo.UpdateReadingStatus(id, b.Status)
+
+	if err != nil {
+		return c.String(http.StatusNotFound, err.Error())
+	}
+
 	return c.NoContent(http.StatusAccepted)
 }
 
 func (h *BookHandler) DeleteBook(c echo.Context) error {
 	id := c.Param("id")
-	h.Repo.DeleteBook(id)
+	err := h.Repo.DeleteBook(id)
+
+	if err != nil {
+		return c.String(http.StatusNotFound, err.Error())
+	}
+
 	return c.NoContent(http.StatusOK)
 }
 

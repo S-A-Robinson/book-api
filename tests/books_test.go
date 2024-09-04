@@ -3,6 +3,7 @@ package tests
 import (
 	"books-api/database"
 	"books-api/models"
+	"books-api/repos"
 	"books-api/server"
 	"books-api/server/handlers"
 	"books-api/tests/helpers"
@@ -39,7 +40,19 @@ var expectedBooks = []models.BookWithAuthorDetails{
 	},
 }
 
+var expectedFilteredBooks = []models.BookWithAuthorDetails{
+	{
+		3,
+		database.InitialBooks[2].Title,
+		database.InitialBooks[2].Pages,
+		database.InitialBooks[2].WordCount,
+		database.InitialBooks[2].Status,
+		database.InitialAuthors[1],
+	},
+}
+
 var marshalledBooks, _ = json.Marshal(&expectedBooks)
+var marshalledFilteredBooks, _ = json.Marshal(&expectedFilteredBooks)
 
 var invalidNewBook = `{"title": 12, "status": "Reading" }`
 
@@ -58,6 +71,16 @@ func TestGetBooks(t *testing.T) {
 			RequestContentType: echo.MIMEApplicationJSON,
 			ExpectedStatusCode: http.StatusOK,
 			ExpectedBody:       string(marshalledBooks) + "\n",
+		},
+		{
+			TestName: "it successfully filters books by given status",
+			Request: helpers.Request{
+				Method: http.MethodGet,
+				Url:    "/books?status=Reading",
+			},
+			RequestContentType: echo.MIMEApplicationJSON,
+			ExpectedStatusCode: http.StatusOK,
+			ExpectedBody:       string(marshalledFilteredBooks) + "\n",
 		},
 	}
 
@@ -158,6 +181,18 @@ func TestPutBooks(t *testing.T) {
 			ExpectedStatusCode: http.StatusBadRequest,
 			ExpectedBody:       handlers.ErrBadBookStatus,
 		},
+		{
+			TestName: "it returns a 404 if a book with that id does not exist",
+			Request: helpers.Request{
+				Method: http.MethodPut,
+				Url:    "/books/4000",
+			},
+			RequestBody: &models.Book{
+				Status: "Read",
+			},
+			ExpectedStatusCode: http.StatusNotFound,
+			ExpectedBody:       repos.ErrBookNotFound,
+		},
 	}
 
 	for _, testCase := range cases {
@@ -179,6 +214,15 @@ func TestDeleteBooks(t *testing.T) {
 			TestName:           "it successfully deletes a book",
 			Request:            request,
 			ExpectedStatusCode: http.StatusOK,
+		},
+		{
+			TestName: "it returns a 404 if a book with that id does not exist",
+			Request: helpers.Request{
+				Method: http.MethodDelete,
+				Url:    "/books/4000",
+			},
+			ExpectedStatusCode: http.StatusNotFound,
+			ExpectedBody:       repos.ErrBookNotFound,
 		},
 	}
 

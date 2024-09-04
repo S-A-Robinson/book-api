@@ -19,6 +19,8 @@ type FullBookDataStruct struct {
 	Author models.Author `gorm:"embedded"`
 }
 
+var ErrBookNotFound = "couldn't find book with that id"
+
 func (r *BookRepository) GetBooks(status string) []FullBookDataStruct {
 	books := make([]FullBookDataStruct, 0, 10)
 	r.DB.
@@ -54,15 +56,27 @@ func (r *BookRepository) AddBook(bookWithAuthor *models.BookWithAuthor) error {
 	return nil
 }
 
-func (r *BookRepository) UpdateReadingStatus(id, newStatus string) {
-	r.DB.
+func (r *BookRepository) UpdateReadingStatus(id, newStatus string) error {
+	tx := r.DB.
 		Model(&models.Book{}).
 		Where("book_id = ?", id).
 		Update("Status", newStatus)
+
+	if tx.RowsAffected == 0 {
+		return fmt.Errorf(ErrBookNotFound)
+	}
+
+	return nil
 }
 
-func (r *BookRepository) DeleteBook(id string) {
-	r.DB.Where("book_id = ?", id).Delete(&models.Book{})
+func (r *BookRepository) DeleteBook(id string) error {
+	tx := r.DB.Where("book_id = ?", id).Delete(&models.Book{})
+
+	if tx.RowsAffected == 0 {
+		return fmt.Errorf(ErrBookNotFound)
+	}
+
+	return nil
 }
 
 type stats struct {
