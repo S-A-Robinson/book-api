@@ -13,8 +13,9 @@ func NewAuthorRepository(db *gorm.DB) *AuthorRepository {
 	return &AuthorRepository{DB: db}
 }
 
-func (r *AuthorRepository) AddAuthor(author *models.Author) {
+func (r *AuthorRepository) AddAuthor(author *models.Author) uint64 {
 	r.DB.Create(author)
+	return author.AuthorID
 }
 
 func (r *AuthorRepository) GetAuthors() *[]models.Author {

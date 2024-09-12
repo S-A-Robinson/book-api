@@ -1,26 +1,26 @@
 package models
 
 type Book struct {
-	BookID    uint64 `gorm:"primaryKey;autoIncrement"`
-	Title     string
-	Pages     uint64
-	WordCount uint64
-	Status    string
+	BookID    uint64 `gorm:"primaryKey;autoIncrement" json:"book_id"`
+	Title     string `json:"title"`
+	Pages     uint64 `json:"pages"`
+	WordCount uint64 `json:"word_count"`
+	Status    string `json:"status"`
 }
 
 type BookWithAuthor struct {
-	BookID    uint64
-	Title     string
-	Pages     uint64
-	WordCount uint64
-	Status    string
-	AuthorID  uint64
+	BookID    uint64 `json:"book_id"`
+	Title     string `json:"title"`
+	Pages     uint64 `json:"pages"`
+	WordCount uint64 `json:"word_count"`
+	Status    string `json:"status"`
+	AuthorID  uint64 `json:"author_id"`
 }
 type BookWithAuthorDetails struct {
-	BookID    uint64
-	Title     string
-	Pages     uint64
-	WordCount uint64
-	Status    string
-	Author    Author
+	BookID    uint64 `json:"book_id"`
+	Title     string `json:"title"`
+	Pages     uint64 `json:"pages"`
+	WordCount uint64 `json:"word_count"`
+	Status    string `json:"status"`
+	Author    Author `json:"author"`
 }

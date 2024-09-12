@@ -38,18 +38,19 @@ func (h *BookHandler) GetBooks(c echo.Context) error {
 func (h *BookHandler) AddBook(c echo.Context) error {
 	b := new(models.BookWithAuthor)
 
-	if err := c.Bind(&b); err != nil {
-		return c.String(http.StatusBadRequest, ErrBadBook)
+	err := c.Bind(b)
+	if err != nil {
+		return c.String(http.StatusBadRequest, ErrBadBook+err.Error())
 	}
 
 	if !BookStatuses[b.Status] {
 		return c.String(http.StatusBadRequest, ErrBadBookStatus)
 	}
 
-	err := h.Repo.AddBook(b)
+	addBookErr := h.Repo.AddBook(b)
 
-	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+	if addBookErr != nil {
+		return c.String(http.StatusBadRequest, addBookErr.Error())
 	}
 
 	return c.NoContent(http.StatusCreated)
@@ -78,6 +79,12 @@ func (h *BookHandler) DeleteBook(c echo.Context) error {
 
 	if err != nil {
 		return c.String(http.StatusNotFound, err.Error())
+	}
+
+	abErr := h.Repo.DeleteAuthorBookByBookID(id)
+
+	if abErr != nil {
+		return c.String(http.StatusNotFound, abErr.Error())
 	}
 
 	return c.NoContent(http.StatusOK)

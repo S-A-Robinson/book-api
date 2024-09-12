@@ -16,7 +16,7 @@ func NewBookRepository(db *gorm.DB) *BookRepository {
 
 type FullBookDataStruct struct {
 	models.Book
-	Author models.Author `gorm:"embedded"`
+	Author models.Author `gorm:"embedded" json:"author"`
 }
 
 var ErrBookNotFound = "couldn't find book with that id"

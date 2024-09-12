@@ -5,6 +5,7 @@ import (
 	"books-api/repos"
 	"github.com/labstack/echo/v4"
 	"net/http"
+	"strconv"
 )
 
 type AuthorHandler struct {
@@ -28,6 +29,6 @@ func (h *AuthorHandler) AddAuthor(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "bad request")
 	}
 
-	h.Repo.AddAuthor(newAuthor)
-	return c.NoContent(http.StatusCreated)
+	id := h.Repo.AddAuthor(newAuthor)
+	return c.String(http.StatusCreated, strconv.FormatUint(id, 10))
 }
