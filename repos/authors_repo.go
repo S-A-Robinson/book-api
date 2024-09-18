@@ -2,7 +2,6 @@ package repos
 
 import (
 	"books-api/models"
-	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -23,7 +22,6 @@ func (r *AuthorRepository) GetAuthors() *[]models.Author {
 }
 
 func (r *AuthorRepository) AddAuthor(author *models.Author) uint64 {
-	fmt.Printf("%+v\n", author)
 	r.DB.Create(author)
 	return author.ID
 }

@@ -15,7 +15,7 @@ import (
 
 var expectedBooks = []models.Book{
 	{
-		1,
+		database.InitialBooks[0].ID,
 		database.InitialBooks[0].AuthorID,
 		database.InitialBooks[0].Title,
 		database.InitialBooks[0].Pages,
@@ -24,7 +24,7 @@ var expectedBooks = []models.Book{
 		database.InitialAuthors[0],
 	},
 	{
-		2,
+		database.InitialBooks[1].ID,
 		database.InitialBooks[1].AuthorID,
 		database.InitialBooks[1].Title,
 		database.InitialBooks[1].Pages,
@@ -33,7 +33,7 @@ var expectedBooks = []models.Book{
 		database.InitialAuthors[0],
 	},
 	{
-		3,
+		database.InitialBooks[2].ID,
 		database.InitialBooks[2].AuthorID,
 		database.InitialBooks[2].Title,
 		database.InitialBooks[2].Pages,
@@ -45,7 +45,7 @@ var expectedBooks = []models.Book{
 
 var expectedFilteredBooks = []models.Book{
 	{
-		3,
+		database.InitialBooks[2].ID,
 		database.InitialBooks[2].AuthorID,
 		database.InitialBooks[2].Title,
 		database.InitialBooks[2].Pages,
