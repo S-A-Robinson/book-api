@@ -55,11 +55,12 @@ func TestPostAuthors(t *testing.T) {
 			TestName: "it adds a new author",
 			Request:  request,
 			RequestBody: &models.Author{
-				AuthorID:  4,
+				ID:        4,
 				FirstName: "Test",
 				LastName:  "Author",
 			},
 			ExpectedStatusCode: http.StatusCreated,
+			ExpectedBody:       "4",
 		},
 		{
 			TestName:           "it returns a bad request if an invalid author is sent",

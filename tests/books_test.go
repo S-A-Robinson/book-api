@@ -13,9 +13,10 @@ import (
 	"testing"
 )
 
-var expectedBooks = []models.BookWithAuthorDetails{
+var expectedBooks = []models.Book{
 	{
 		1,
+		database.InitialBooks[0].AuthorID,
 		database.InitialBooks[0].Title,
 		database.InitialBooks[0].Pages,
 		database.InitialBooks[0].WordCount,
@@ -24,6 +25,7 @@ var expectedBooks = []models.BookWithAuthorDetails{
 	},
 	{
 		2,
+		database.InitialBooks[1].AuthorID,
 		database.InitialBooks[1].Title,
 		database.InitialBooks[1].Pages,
 		database.InitialBooks[1].WordCount,
@@ -32,6 +34,7 @@ var expectedBooks = []models.BookWithAuthorDetails{
 	},
 	{
 		3,
+		database.InitialBooks[2].AuthorID,
 		database.InitialBooks[2].Title,
 		database.InitialBooks[2].Pages,
 		database.InitialBooks[2].WordCount,
@@ -40,9 +43,10 @@ var expectedBooks = []models.BookWithAuthorDetails{
 	},
 }
 
-var expectedFilteredBooks = []models.BookWithAuthorDetails{
+var expectedFilteredBooks = []models.Book{
 	{
 		3,
+		database.InitialBooks[2].AuthorID,
 		database.InitialBooks[2].Title,
 		database.InitialBooks[2].Pages,
 		database.InitialBooks[2].WordCount,
@@ -103,7 +107,8 @@ func TestPostBooks(t *testing.T) {
 		{
 			TestName: "it adds a new book",
 			Request:  request,
-			RequestBody: &models.BookWithAuthor{
+			RequestBody: &models.Book{
+				ID:        4,
 				Title:     "Test New Book",
 				Pages:     100,
 				WordCount: 2123,
@@ -117,7 +122,7 @@ func TestPostBooks(t *testing.T) {
 			TestName: "it returns a bad request if the status is incorrect",
 			Request:  request,
 			RequestBody: &models.Book{
-				BookID:    2,
+				ID:        5,
 				Title:     "Invalid Status Book",
 				Pages:     101,
 				WordCount: 1234,
@@ -136,7 +141,7 @@ func TestPostBooks(t *testing.T) {
 		{
 			TestName: "it returns an error if the author doesn't exist",
 			Request:  request,
-			RequestBody: &models.BookWithAuthor{
+			RequestBody: &models.Book{
 				Title:     "Test New Book With Invalid Author",
 				Pages:     100,
 				WordCount: 2123,

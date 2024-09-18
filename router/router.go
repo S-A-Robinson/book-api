@@ -27,6 +27,7 @@ func New(r *repos.Repos) *echo.Echo {
 	authorHandler := handlers.NewAuthorHandler(r.Author)
 	e.GET("/authors", authorHandler.GetAuthors)
 	e.POST("/authors", authorHandler.AddAuthor)
+	e.DELETE("/authors/:id", authorHandler.DeleteAuthor)
 
 	return e
 }

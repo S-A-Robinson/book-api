@@ -21,45 +21,32 @@ type FullBookDataStruct struct {
 
 var ErrBookNotFound = "couldn't find book with that id"
 
-func (r *BookRepository) GetBooks(status string) []FullBookDataStruct {
-	books := make([]FullBookDataStruct, 0, 10)
+func (r *BookRepository) GetBooks(status string) []*models.Book {
+	var books []*models.Book
 	r.DB.
-		Model(&models.Book{}).
-		Select("books.*, authors.*").
-		Joins("left join author_books on (books.book_id = author_books.book_id)").
-		Joins("left join authors on (authors.author_id = author_books.author_id)").
+		Preload("Author").
 		Find(&books, &models.Book{Status: status})
+
 	return books
 }
 
-func (r *BookRepository) AddBook(bookWithAuthor *models.BookWithAuthor) error {
+func (r *BookRepository) AddBook(book *models.Book) error {
 	a := &models.Author{}
-	r.DB.Where("author_id = ?", bookWithAuthor.AuthorID).First(&a)
+	r.DB.Where("id = ?", book.AuthorID).First(&a)
 
-	if a.AuthorID != bookWithAuthor.AuthorID {
-		return fmt.Errorf("couldn't find author with id %d", bookWithAuthor.AuthorID)
+	if a.ID != book.AuthorID {
+		return fmt.Errorf("couldn't find author with id %d", book.AuthorID)
 	}
 
-	b := models.Book{
-		BookID:    bookWithAuthor.BookID,
-		Title:     bookWithAuthor.Title,
-		Pages:     bookWithAuthor.Pages,
-		WordCount: bookWithAuthor.WordCount,
-		Status:    bookWithAuthor.Status,
-	}
-	r.DB.Create(&b)
+	r.DB.Create(&book)
 
-	r.DB.Create(&models.AuthorBook{
-		AuthorID: bookWithAuthor.AuthorID,
-		BookID:   b.BookID,
-	})
 	return nil
 }
 
 func (r *BookRepository) UpdateReadingStatus(id, newStatus string) error {
 	tx := r.DB.
 		Model(&models.Book{}).
-		Where("book_id = ?", id).
+		Where("id = ?", id).
 		Update("Status", newStatus)
 
 	if tx.RowsAffected == 0 {
@@ -70,7 +57,7 @@ func (r *BookRepository) UpdateReadingStatus(id, newStatus string) error {
 }
 
 func (r *BookRepository) DeleteBook(id string) error {
-	tx := r.DB.Where("book_id = ?", id).Delete(&models.Book{})
+	tx := r.DB.Where("id = ?", id).Delete(&models.Book{})
 
 	if tx.RowsAffected == 0 {
 		return fmt.Errorf(ErrBookNotFound)

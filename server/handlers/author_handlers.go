@@ -32,3 +32,14 @@ func (h *AuthorHandler) AddAuthor(c echo.Context) error {
 	id := h.Repo.AddAuthor(newAuthor)
 	return c.String(http.StatusCreated, strconv.FormatUint(id, 10))
 }
+
+func (h *AuthorHandler) DeleteAuthor(c echo.Context) error {
+	id := c.Param("id")
+	err := h.Repo.DeleteAuthor(id)
+
+	if err != nil {
+		return c.String(http.StatusNotFound, err.Error())
+	}
+
+	return c.NoContent(http.StatusOK)
+}

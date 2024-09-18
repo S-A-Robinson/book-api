@@ -4,12 +4,12 @@ import "books-api/models"
 
 var InitialAuthors = []models.Author{
 	{
-		AuthorID:  1,
+		ID:        1,
 		FirstName: "Dan",
 		LastName:  "Simmons",
 	},
 	{
-		AuthorID:  2,
+		ID:        2,
 		FirstName: "Stephen",
 		LastName:  "King",
 	},

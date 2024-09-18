@@ -2,9 +2,9 @@ package database
 
 import "books-api/models"
 
-var InitialBooks = []models.BookWithAuthor{
+var InitialBooks = []models.Book{
 	{
-		BookID:    1,
+		ID:        1,
 		Title:     "Hyperion",
 		Pages:     500,
 		WordCount: 120250,
@@ -12,7 +12,7 @@ var InitialBooks = []models.BookWithAuthor{
 		AuthorID:  1,
 	},
 	{
-		BookID:    2,
+		ID:        2,
 		Title:     "The Fall of Hyperion",
 		Pages:     528,
 		WordCount: 132000,
@@ -20,7 +20,7 @@ var InitialBooks = []models.BookWithAuthor{
 		AuthorID:  1,
 	},
 	{
-		BookID:    3,
+		ID:        3,
 		Title:     "The Stand",
 		Pages:     1153,
 		WordCount: 288250,
