@@ -3,6 +3,7 @@ package handlers
 import (
 	"books-api/models"
 	"books-api/repos"
+	"books-api/server/requests"
 	"github.com/labstack/echo/v4"
 	"net/http"
 	"strconv"
@@ -22,14 +23,20 @@ func (h *AuthorHandler) GetAuthors(c echo.Context) error {
 }
 
 func (h *AuthorHandler) AddAuthor(c echo.Context) error {
-	newAuthor := new(models.Author)
-	err := c.Bind(&newAuthor)
+	newAuthorRequest := new(requests.Author)
+	err := c.Bind(&newAuthorRequest)
 
 	if err != nil {
 		return c.String(http.StatusBadRequest, "bad request")
 	}
 
-	id := h.Repo.AddAuthor(newAuthor)
+	author := &models.Author{
+		FirstName: newAuthorRequest.FirstName,
+		LastName:  newAuthorRequest.LastName,
+		ImageURL:  newAuthorRequest.ImageURL,
+	}
+
+	id := h.Repo.AddAuthor(author)
 	return c.String(http.StatusCreated, strconv.FormatUint(id, 10))
 }
 

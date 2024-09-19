@@ -3,6 +3,7 @@ package handlers
 import (
 	"books-api/models"
 	"books-api/repos"
+	"books-api/server/requests"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -36,18 +37,26 @@ func (h *BookHandler) GetBooks(c echo.Context) error {
 }
 
 func (h *BookHandler) AddBook(c echo.Context) error {
-	b := new(models.Book)
+	newBookRequest := new(requests.BookRequest)
 
-	err := c.Bind(b)
+	err := c.Bind(newBookRequest)
 	if err != nil {
 		return c.String(http.StatusBadRequest, ErrBadBook)
 	}
 
-	if !BookStatuses[b.Status] {
+	if !BookStatuses[newBookRequest.Status] {
 		return c.String(http.StatusBadRequest, ErrBadBookStatus)
 	}
 
-	addBookErr := h.Repo.AddBook(b)
+	book := &models.Book{
+		Title:     newBookRequest.Title,
+		Pages:     newBookRequest.Pages,
+		WordCount: newBookRequest.WordCount,
+		Status:    newBookRequest.Status,
+		AuthorID:  newBookRequest.AuthorID,
+	}
+
+	addBookErr := h.Repo.AddBook(book)
 
 	if addBookErr != nil {
 		return c.String(http.StatusBadRequest, addBookErr.Error())
@@ -58,13 +67,17 @@ func (h *BookHandler) AddBook(c echo.Context) error {
 
 func (h *BookHandler) UpdateBook(c echo.Context) error {
 	id := c.Param("id")
-	b := new(models.Book)
-	c.Bind(&b)
+	newBookStatusRequest := new(requests.BookStatusRequest)
 
-	if !BookStatuses[b.Status] {
+	if err := c.Bind(newBookStatusRequest); err != nil {
+		return err
+	}
+
+	if !BookStatuses[newBookStatusRequest.Status] {
 		return c.String(http.StatusBadRequest, ErrBadBookStatus)
 	}
-	err := h.Repo.UpdateReadingStatus(id, b.Status)
+
+	err := h.Repo.UpdateReadingStatus(id, newBookStatusRequest.Status)
 
 	if err != nil {
 		return c.String(http.StatusNotFound, err.Error())

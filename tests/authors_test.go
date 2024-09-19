@@ -49,13 +49,12 @@ func TestPostAuthors(t *testing.T) {
 			TestName: "it adds a new author",
 			Request:  request,
 			RequestBody: &models.Author{
-				ID:        4,
 				FirstName: "Test",
 				LastName:  "Author",
 			},
 			Expected: helpers.ExpectedResponse{
 				StatusCode: http.StatusCreated,
-				BodyPart:   "4",
+				BodyPart:   "3",
 			},
 		},
 		{

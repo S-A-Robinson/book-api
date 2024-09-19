@@ -10,12 +10,3 @@ type Book struct {
 
 	Author Author `json:"author"`
 }
-
-type BookWithAuthorDetails struct {
-	ID        uint64 `json:"id"`
-	Title     string `json:"title"`
-	Pages     uint64 `json:"pages"`
-	WordCount uint64 `json:"word_count"`
-	Status    string `json:"status"`
-	Author    Author `json:"author"`
-}
