@@ -24,7 +24,7 @@ func SeedAuthors(db *gorm.DB) {
 	authors := &InitialAuthors
 	authorRepo := repos.NewAuthorRepository(db)
 	for _, author := range *authors {
-		authorRepo.AddAuthor(&author)
+		authorRepo.DB.Where("id = ?", author.ID).FirstOrCreate(&author)
 	}
 }
 
@@ -32,6 +32,6 @@ func SeedBooks(db *gorm.DB) {
 	books := &InitialBooks
 	bookRepo := repos.NewBookRepository(db)
 	for _, book := range *books {
-		bookRepo.AddBook(&book)
+		bookRepo.DB.Where("id = ?", book.ID).FirstOrCreate(&book)
 	}
 }
