@@ -4,7 +4,6 @@ import (
 	"books-api/database"
 	"books-api/models"
 	"books-api/repos"
-	"books-api/server"
 	"books-api/server/handlers"
 	"books-api/tests/helpers"
 	"encoding/json"
@@ -61,8 +60,6 @@ var marshalledFilteredBooks, _ = json.Marshal(&expectedFilteredBooks)
 var invalidNewBook = `{"title": 12, "status": "Reading" }`
 
 func TestGetBooks(t *testing.T) {
-	s := server.New()
-
 	request := helpers.Request{
 		Method: http.MethodGet,
 		Url:    "/books",
@@ -73,8 +70,17 @@ func TestGetBooks(t *testing.T) {
 			TestName:           "it successfully gets all books in db",
 			Request:            request,
 			RequestContentType: echo.MIMEApplicationJSON,
-			ExpectedStatusCode: http.StatusOK,
-			ExpectedBody:       string(marshalledBooks) + "\n",
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusOK,
+				BodyParts: []string{
+					database.InitialBooks[0].Title,
+					database.InitialBooks[0].Status,
+					database.InitialBooks[1].Title,
+					database.InitialBooks[1].Status,
+					database.InitialBooks[2].Title,
+					database.InitialBooks[2].Status,
+				},
+			},
 		},
 		{
 			TestName: "it successfully filters books by given status",
@@ -83,21 +89,24 @@ func TestGetBooks(t *testing.T) {
 				Url:    "/books?status=Reading",
 			},
 			RequestContentType: echo.MIMEApplicationJSON,
-			ExpectedStatusCode: http.StatusOK,
-			ExpectedBody:       string(marshalledFilteredBooks) + "\n",
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusOK,
+				BodyParts: []string{
+					database.InitialBooks[2].Title,
+					database.InitialBooks[2].Status,
+				},
+			},
 		},
 	}
 
 	for _, testCase := range cases {
 		t.Run(testCase.TestName, func(t *testing.T) {
-			helpers.ExecuteTest(t, s.Echo, testCase)
+			RunTestCase(t, testCase)
 		})
 	}
 }
 
 func TestPostBooks(t *testing.T) {
-	s := server.New()
-
 	request := helpers.Request{
 		Method: http.MethodPost,
 		Url:    "/books",
@@ -115,8 +124,9 @@ func TestPostBooks(t *testing.T) {
 				Status:    "Reading",
 				AuthorID:  2,
 			},
-
-			ExpectedStatusCode: http.StatusCreated,
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusCreated,
+			},
 		},
 		{
 			TestName: "it returns a bad request if the status is incorrect",
@@ -128,15 +138,19 @@ func TestPostBooks(t *testing.T) {
 				WordCount: 1234,
 				Status:    "Invalid Status",
 			},
-			ExpectedStatusCode: http.StatusBadRequest,
-			ExpectedBody:       handlers.ErrBadBookStatus,
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusBadRequest,
+				BodyPart:   handlers.ErrBadBookStatus,
+			},
 		},
 		{
-			TestName:           "it returns a bad request if the body isn't valid",
-			Request:            request,
-			RequestBody:        invalidNewBook,
-			ExpectedStatusCode: http.StatusBadRequest,
-			ExpectedBody:       handlers.ErrBadBook,
+			TestName:    "it returns a bad request if the body isn't valid",
+			Request:     request,
+			RequestBody: invalidNewBook,
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusBadRequest,
+				BodyPart:   handlers.ErrBadBook,
+			},
 		},
 		{
 			TestName: "it returns an error if the author doesn't exist",
@@ -148,21 +162,21 @@ func TestPostBooks(t *testing.T) {
 				Status:    "Reading",
 				AuthorID:  4000,
 			},
-			ExpectedStatusCode: http.StatusBadRequest,
-			ExpectedBody:       "couldn't find author with id 4000",
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusBadRequest,
+				BodyPart:   "couldn't find author with id 4000",
+			},
 		},
 	}
 
 	for _, testCase := range cases {
 		t.Run(testCase.TestName, func(t *testing.T) {
-			helpers.ExecuteTest(t, s.Echo, testCase)
+			RunTestCase(t, testCase)
 		})
 	}
 }
 
 func TestPutBooks(t *testing.T) {
-	s := server.New()
-
 	request := helpers.Request{
 		Method: http.MethodPut,
 		Url:    "/books/1",
@@ -175,7 +189,9 @@ func TestPutBooks(t *testing.T) {
 			RequestBody: &models.Book{
 				Status: "Read",
 			},
-			ExpectedStatusCode: http.StatusAccepted,
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusAccepted,
+			},
 		},
 		{
 			TestName: "it returns a bad request if the status is invalid",
@@ -183,8 +199,11 @@ func TestPutBooks(t *testing.T) {
 			RequestBody: &models.Book{
 				Status: "Invalid Status",
 			},
-			ExpectedStatusCode: http.StatusBadRequest,
-			ExpectedBody:       handlers.ErrBadBookStatus,
+
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusBadRequest,
+				BodyPart:   handlers.ErrBadBookStatus,
+			},
 		},
 		{
 			TestName: "it returns a 404 if a book with that id does not exist",
@@ -195,20 +214,20 @@ func TestPutBooks(t *testing.T) {
 			RequestBody: &models.Book{
 				Status: "Read",
 			},
-			ExpectedStatusCode: http.StatusNotFound,
-			ExpectedBody:       repos.ErrBookNotFound,
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusNotFound,
+				BodyPart:   repos.ErrBookNotFound,
+			},
 		},
 	}
 
 	for _, testCase := range cases {
 		t.Run(testCase.TestName, func(t *testing.T) {
-			helpers.ExecuteTest(t, s.Echo, testCase)
+			RunTestCase(t, testCase)
 		})
 	}
 }
 func TestDeleteBooks(t *testing.T) {
-	s := server.New()
-
 	request := helpers.Request{
 		Method: http.MethodDelete,
 		Url:    "/books/1",
@@ -216,9 +235,11 @@ func TestDeleteBooks(t *testing.T) {
 
 	cases := []helpers.TestCase{
 		{
-			TestName:           "it successfully deletes a book",
-			Request:            request,
-			ExpectedStatusCode: http.StatusOK,
+			TestName: "it successfully deletes a book",
+			Request:  request,
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusOK,
+			},
 		},
 		{
 			TestName: "it returns a 404 if a book with that id does not exist",
@@ -226,14 +247,16 @@ func TestDeleteBooks(t *testing.T) {
 				Method: http.MethodDelete,
 				Url:    "/books/4000",
 			},
-			ExpectedStatusCode: http.StatusNotFound,
-			ExpectedBody:       repos.ErrBookNotFound,
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusNotFound,
+				BodyPart:   repos.ErrBookNotFound,
+			},
 		},
 	}
 
 	for _, testCase := range cases {
 		t.Run(testCase.TestName, func(t *testing.T) {
-			helpers.ExecuteTest(t, s.Echo, testCase)
+			RunTestCase(t, testCase)
 		})
 	}
 }
