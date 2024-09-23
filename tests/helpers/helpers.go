@@ -26,9 +26,11 @@ type Request struct {
 }
 
 type ExpectedResponse struct {
-	StatusCode int
-	BodyPart   string
-	BodyParts  []string
+	StatusCode       int
+	BodyPart         string
+	BodyParts        []string
+	BodyPartMissing  string
+	BodyPartsMissing []string
 }
 
 func assertStatusCode(t *testing.T, got, want int) {

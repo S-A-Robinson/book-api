@@ -33,7 +33,8 @@ func NewBookHandler(repo *repos.BookRepository) *BookHandler {
 
 func (h *BookHandler) GetBooks(c echo.Context) error {
 	status := c.QueryParam("status")
-	return c.JSON(http.StatusOK, h.Repo.GetBooks(status))
+	title := c.QueryParam("title")
+	return c.JSON(http.StatusOK, h.Repo.GetBooks(status, title))
 }
 
 func (h *BookHandler) AddBook(c echo.Context) error {

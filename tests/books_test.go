@@ -97,6 +97,42 @@ func TestGetBooks(t *testing.T) {
 				},
 			},
 		},
+		{
+			TestName: "it successfully gets books by title",
+			Request: helpers.Request{
+				Method: http.MethodGet,
+				Url:    "/books?title=Hyperion",
+			},
+			RequestContentType: echo.MIMEApplicationJSON,
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusOK,
+				BodyParts: []string{
+					database.InitialBooks[0].Title,
+					database.InitialBooks[1].Title,
+				},
+				BodyPartsMissing: []string{
+					database.InitialBooks[2].Title,
+				},
+			},
+		},
+		{
+			TestName: "it successfully gets a different book by title",
+			Request: helpers.Request{
+				Method: http.MethodGet,
+				Url:    "/books?title=Stand",
+			},
+			RequestContentType: echo.MIMEApplicationJSON,
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusOK,
+				BodyParts: []string{
+					database.InitialBooks[2].Title,
+				},
+				BodyPartsMissing: []string{
+					database.InitialBooks[0].Title,
+					database.InitialBooks[1].Title,
+				},
+			},
+		},
 	}
 
 	for _, testCase := range cases {

@@ -21,11 +21,19 @@ type FullBookDataStruct struct {
 
 var ErrBookNotFound = "couldn't find book with that id"
 
-func (r *BookRepository) GetBooks(status string) []*models.Book {
+func (r *BookRepository) GetBooks(status, title string) []*models.Book {
 	var books []*models.Book
-	r.DB.
-		Preload("Author").
-		Find(&books, &models.Book{Status: status})
+
+	if title == "" {
+		r.DB.
+			Preload("Author").
+			Find(&books, &models.Book{Status: status})
+	} else {
+		r.DB.
+			Preload("Author").
+			Where("title LIKE ?", "%"+title+"%").
+			Find(&books, &models.Book{Status: status})
+	}
 
 	return books
 }
