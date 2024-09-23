@@ -75,3 +75,35 @@ func TestPostAuthors(t *testing.T) {
 	}
 
 }
+func TestDeleteAuthors(t *testing.T) {
+	cases := []helpers.TestCase{
+		{
+			TestName: "it deletes an author with a given id",
+			Request: helpers.Request{
+				Method: http.MethodDelete,
+				Url:    "/authors/1",
+			},
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusOK,
+			},
+		},
+		{
+			TestName: "it returns a 404 if the author doesn't exist",
+			Request: helpers.Request{
+				Method: http.MethodDelete,
+				Url:    "/authors/4000",
+			},
+			Expected: helpers.ExpectedResponse{
+				StatusCode: http.StatusNotFound,
+				BodyPart:   "no authors found",
+			},
+		},
+	}
+
+	for _, testCase := range cases {
+		t.Run(testCase.TestName, func(t *testing.T) {
+			RunTestCase(t, testCase)
+		})
+	}
+
+}

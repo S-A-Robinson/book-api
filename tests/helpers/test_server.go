@@ -1,10 +1,13 @@
 package helpers
 
 import (
+	"books-api/database"
 	"books-api/server"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/labstack/echo/v4"
+	"log"
 	"net/http"
 	"net/http/httptest"
 )
@@ -20,6 +23,8 @@ func NewTestServer() *TestServer {
 }
 
 func (ts *TestServer) ExecuteTestCase(testCase *TestCase) *httptest.ResponseRecorder {
+	ts.SetupDefaults()
+
 	req, _ := ts.GenerateRequest(testCase)
 	res := ts.ExecuteRequest(req)
 	return res
@@ -55,4 +60,17 @@ func (ts *TestServer) GenerateRequest(testCase *TestCase) (*http.Request, error)
 	}
 
 	return req, nil
+}
+
+func (ts *TestServer) ClearTable(tableName string) {
+	err := ts.S.Database.Exec(fmt.Sprintf("DELETE FROM %v", tableName)).Error
+	if err != nil {
+		log.Fatalf("You can't clear that table. Err: %v", err)
+	}
+}
+
+func (ts *TestServer) SetupDefaults() {
+	ts.ClearTable("books")
+	ts.ClearTable("authors")
+	database.Seed(ts.S.Database)
 }

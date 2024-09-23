@@ -2,6 +2,7 @@ package repos
 
 import (
 	"books-api/models"
+	"errors"
 	"gorm.io/gorm"
 )
 
@@ -27,7 +28,11 @@ func (r *AuthorRepository) AddAuthor(author *models.Author) uint64 {
 }
 
 func (r *AuthorRepository) DeleteAuthor(id string) error {
-	r.DB.Where("id = ? ", id).Delete(&models.Author{})
+	tx := r.DB.Where("id = ? ", id).Delete(&models.Author{})
+	if tx.RowsAffected == 0 {
+		return errors.New("no authors found")
+	}
+
 	r.DB.Where("author_id = ?", id).Delete(&models.Book{})
 
 	return nil

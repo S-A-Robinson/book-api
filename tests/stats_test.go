@@ -19,8 +19,8 @@ func TestStats(t *testing.T) {
 			Expected: helpers.ExpectedResponse{
 				StatusCode: http.StatusOK,
 				BodyParts: []string{
-					"1781",
-					"422373",
+					"2181",
+					"540500",
 				},
 			},
 		},

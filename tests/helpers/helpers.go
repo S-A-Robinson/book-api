@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"io"
-	"testing"
 )
 
 type TestCase struct {
@@ -31,18 +30,4 @@ type ExpectedResponse struct {
 	BodyParts        []string
 	BodyPartMissing  string
 	BodyPartsMissing []string
-}
-
-func assertStatusCode(t *testing.T, got, want int) {
-	t.Helper()
-	if got != want {
-		t.Errorf("wanted status code %v but got %v", want, got)
-	}
-}
-
-func assertResponseBody(t *testing.T, got, want string) {
-	t.Helper()
-	if got != want {
-		t.Errorf("wanted response body of %q got %q", want, got)
-	}
 }
